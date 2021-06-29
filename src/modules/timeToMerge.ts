@@ -1,18 +1,23 @@
 import { Octokit } from "octokit";
 import * as dateFns from "date-fns";
 
-export default async function getTimeToMerge({ owner, repo, count }: Options) {
-  const prs = await listPrs({ owner, repo, count });
-  console.log(prs);
+export default async function getTimeToMerge({
+  owner,
+  repo,
+  count,
+  token,
+}: Options) {
+  return await listPrs({ owner, repo, count, token });
 }
 
 type Options = {
   owner: string;
   repo: string;
   count: number;
+  token: string;
 };
 
-async function listPrs({ owner, repo, count }: ListPrsOptions) {
+async function listPrs({ owner, repo, count, token }: ListPrsOptions) {
   const githubClient = new Octokit();
 
   // TODO: Think about how it should work when a PR goes back and forth
@@ -27,19 +32,21 @@ async function listPrs({ owner, repo, count }: ListPrsOptions) {
     };
   }>(
     `
-    repository(owner: $owner, repo: $repo) {
-      pullRequests(last: $count, states: CLOSED) {
-        edges {
-          node {
-            number
-            title
-            createdAt
-            mergedAt
-            timelineItems(last: 1, itemTypes: [READY_FOR_REVIEW_EVENT]) {
-              edges {
-                node {
-                  ... on ReadyForReviewEvent {
-                    createdAt
+    query GetPullRequests($owner: String!, $repo: String!, $count: Int!) {
+      repository(owner: $owner, name: $repo) {
+        pullRequests(last: $count, states: CLOSED) {
+          edges {
+            node {
+              number
+              title
+              createdAt
+              mergedAt
+              timelineItems(last: 1, itemTypes: [READY_FOR_REVIEW_EVENT]) {
+                edges {
+                  node {
+                    ... on ReadyForReviewEvent {
+                      createdAt
+                    }
                   }
                 }
               }
@@ -53,6 +60,9 @@ async function listPrs({ owner, repo, count }: ListPrsOptions) {
       count,
       owner,
       repo,
+      headers: {
+        authorization: `bearer ${token}`,
+      },
     }
   );
 
@@ -65,6 +75,7 @@ type ListPrsOptions = {
   owner: string;
   repo: string;
   count: number;
+  token: string;
 };
 
 type PullRequestResponse = {

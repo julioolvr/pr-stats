@@ -1,27 +1,21 @@
-import React from "react";
-import { useHistory } from "react-router-dom";
-import { Auth0Provider } from "@auth0/auth0-react";
+import React, { useState, createContext } from "react";
 
-export default function Auth0ProviderWithHistory({ children }: Props) {
-  // TODO: Check properly that these are always present
-  const domain = process.env.REACT_APP_AUTH0_DOMAIN;
-  const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID;
+type AuthContextType = {
+  token: string | null;
+  setToken: (token: string) => void;
+};
 
-  const history = useHistory();
+export const AuthContext = createContext<AuthContextType>(
+  {} as AuthContextType
+);
 
-  const onRedirectCallback = (appState: any) => {
-    history.push(appState?.returnTo || window.location.pathname);
-  };
+export default function AuthProvider({ children }: Props) {
+  const [token, setToken] = useState<string | null>(null);
 
   return (
-    <Auth0Provider
-      domain={domain!}
-      clientId={clientId!}
-      redirectUri={window.location.origin}
-      onRedirectCallback={onRedirectCallback}
-    >
+    <AuthContext.Provider value={{ token, setToken }}>
       {children}
-    </Auth0Provider>
+    </AuthContext.Provider>
   );
 }
 

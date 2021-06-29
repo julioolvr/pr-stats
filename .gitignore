@@ -18,6 +18,14 @@
 .env.test.local
 .env.production.local
 
+# `netlify dev` will pick env variables from `.env` but not from `.env.local`.
+# There might be a way to configure it but I couldn't find it, so I'll just use
+# `.env`.
+.env
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Local development Netlify stuff
+.netlify
