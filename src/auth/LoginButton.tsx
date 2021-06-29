@@ -6,7 +6,7 @@ export function LoginButton() {
   return (
     <a
       href={`https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
-        "http://localhost:8888/auth/callback"
+        `${window.location.origin}/auth/callback`
       )}&scope=repo`}
     >
       Login
