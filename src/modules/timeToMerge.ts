@@ -6,8 +6,51 @@ export default async function getTimeToMerge({
   repo,
   count,
   token,
-}: Options) {
-  return await listPrs({ owner, repo, count, token });
+}: Options): Promise<Result> {
+  const prs = await listPrs({ owner, repo, count, token });
+
+  if (prs.length === 0) {
+    return {
+      stats: {
+        average: 0,
+        p50: 0,
+        p75: 0,
+        p90: 0,
+        p99: 0,
+      },
+      prs: [],
+    };
+  }
+
+  const prsMetrics = prs.map((pr) => {
+    // TODO: Don't count weekends
+    // TODO: Maybe even make working days configurable somehow to account for
+    // holidays
+    const hoursUntilMerge = dateFns.differenceInHours(
+      pr.mergedAt,
+      pr.reviewRequestedDate
+    );
+
+    return {
+      number: pr.number,
+      title: pr.title,
+      hoursUntilMerge,
+    };
+  });
+
+  prsMetrics.sort((a, b) => a.hoursUntilMerge - b.hoursUntilMerge);
+  const hours = prsMetrics.map((pr) => pr.hoursUntilMerge);
+
+  const average = hours.reduce((a, b) => a + b, 0) / prsMetrics.length;
+  const p50 = percentile(hours, 50);
+  const p75 = percentile(hours, 75);
+  const p90 = percentile(hours, 90);
+  const p99 = percentile(hours, 99);
+
+  return {
+    prs: prsMetrics,
+    stats: { average, p50, p75, p90, p99 },
+  };
 }
 
 type Options = {
@@ -15,6 +58,21 @@ type Options = {
   repo: string;
   count: number;
   token: string;
+};
+
+type Result = {
+  stats: {
+    average: number;
+    p50: number;
+    p75: number;
+    p90: number;
+    p99: number;
+  };
+  prs: {
+    number: number;
+    title: string;
+    hoursUntilMerge: number;
+  }[];
 };
 
 async function listPrs({ owner, repo, count, token }: ListPrsOptions) {
@@ -34,7 +92,7 @@ async function listPrs({ owner, repo, count, token }: ListPrsOptions) {
     `
     query GetPullRequests($owner: String!, $repo: String!, $count: Int!) {
       repository(owner: $owner, name: $repo) {
-        pullRequests(last: $count, states: CLOSED) {
+        pullRequests(last: $count, states: MERGED) {
           edges {
             node {
               number
@@ -122,4 +180,14 @@ function parsePrResponse(pr: PullRequestResponse): PullRequest {
     mergedAt: dateFns.parseISO(pr.mergedAt),
     reviewRequestedDate,
   };
+}
+
+function percentile(data: number[], percentile: number) {
+  const index = (data.length * percentile) / 100;
+
+  if (Number.isInteger(index)) {
+    return (data[index - 1] + data[index]) / 2;
+  } else {
+    return data[Math.ceil(index) - 1];
+  }
 }
