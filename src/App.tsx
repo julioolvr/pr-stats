@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import { useQuery, QueryClient, QueryClientProvider } from "react-query";
 import { QueryParamProvider } from "use-query-params";
+import { BarChart, Bar, YAxis, LabelList } from "recharts";
 
 import AuthProvider from "./auth/AuthProvider";
 import { LoginButton } from "./auth/LoginButton";
@@ -36,7 +37,7 @@ const COUNT = 10;
 function PrListTest() {
   const token = useGithubToken();
 
-  const query = useQuery<any, Error>(
+  const query = useQuery(
     ["prs", OWNER, REPO, COUNT, token],
     async () =>
       await getTimeToMerge({
@@ -48,5 +49,49 @@ function PrListTest() {
     { enabled: !!token }
   );
 
-  return <div>Data! {query.data && JSON.stringify(query.data, null, 2)}</div>;
+  if (!query.data || query.isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  console.log(query.data);
+
+  return (
+    <div>
+      <table>
+        <thead>
+          <tr>
+            <th>Number of PRs</th>
+            <th>Total number of hours to merge</th>
+            <th>Average</th>
+            <th>P50</th>
+            <th>P75</th>
+            <th>P90</th>
+            <th>P99</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>{query.data.prs.length}</td>
+            <td>
+              {query.data.prs
+                .map((pr) => pr.hoursUntilMerge)
+                .reduce((a, b) => a + b, 0)}
+            </td>
+            <td>{query.data.stats.average}</td>
+            <td>{query.data.stats.p50}</td>
+            <td>{query.data.stats.p75}</td>
+            <td>{query.data.stats.p90}</td>
+            <td>{query.data.stats.p99}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <BarChart data={query.data.prs} width={730} height={250}>
+        <Bar dataKey="hoursUntilMerge" fill="#8884d8">
+          <LabelList dataKey="title" position="insideTop" angle={45} />
+        </Bar>
+      </BarChart>
+    </div>
+  );
 }

@@ -1,4 +1,4 @@
-import React, { useState, createContext } from "react";
+import React, { createContext } from "react";
 import createPersistedState from "use-persisted-state";
 
 // Localstorage is not the best place to store a token because it could be
