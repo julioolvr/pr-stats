@@ -1,11 +1,11 @@
 import { Route, Switch } from "react-router-dom";
 
-import Config from "./config/Config";
-import PrivateRoute from "./auth/PrivateRoute";
+import Config from "config/Config";
+import PrivateRoute from "auth/PrivateRoute";
 
-import { AuthHandler } from "./auth/AuthHandler";
-import Login from "./pages/Login";
-import PrStats from "./pages/PrStats";
+import { AuthHandler } from "auth/AuthHandler";
+import Login from "pages/Login";
+import PrStats from "pages/PrStats";
 
 function App() {
   return (

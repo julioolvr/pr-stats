@@ -12,8 +12,8 @@ import {
   Spinner,
 } from "@chakra-ui/react";
 
-import useGithubToken from "../auth/useGithubToken";
-import getTimeToMerge from "../modules/timeToMerge";
+import useGithubToken from "auth/useGithubToken";
+import getTimeToMerge from "modules/timeToMerge";
 
 const COUNT = 10;
 

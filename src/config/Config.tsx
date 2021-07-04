@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { QueryParamProvider } from "use-query-params";
 import { ChakraProvider } from "@chakra-ui/react";
 
-import AuthProvider from "../auth/AuthProvider";
+import AuthProvider from "auth/AuthProvider";
 
 const queryClient = new QueryClient();
 
