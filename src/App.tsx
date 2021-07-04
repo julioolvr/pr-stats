@@ -1,7 +1,18 @@
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import { useQuery, QueryClient, QueryClientProvider } from "react-query";
 import { QueryParamProvider } from "use-query-params";
-import { BarChart, Bar, YAxis, LabelList } from "recharts";
+import { BarChart, Bar, LabelList } from "recharts";
+import { ChakraProvider } from "@chakra-ui/react";
+import {
+  Box,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Spinner,
+} from "@chakra-ui/react";
 
 import AuthProvider from "./auth/AuthProvider";
 import { LoginButton } from "./auth/LoginButton";
@@ -15,14 +26,16 @@ function App() {
   return (
     <Router>
       <QueryParamProvider ReactRouterRoute={Route}>
-        <AuthProvider>
-          <QueryClientProvider client={queryClient}>
-            <PrListTest />
-            <LoginButton />
+        <ChakraProvider>
+          <AuthProvider>
+            <QueryClientProvider client={queryClient}>
+              <PrListTest />
+              <LoginButton />
 
-            <Route path="/auth/callback" component={AuthHandler} />
-          </QueryClientProvider>
-        </AuthProvider>
+              <Route path="/auth/callback" component={AuthHandler} />
+            </QueryClientProvider>
+          </AuthProvider>
+        </ChakraProvider>
       </QueryParamProvider>
     </Router>
   );
@@ -50,48 +63,48 @@ function PrListTest() {
   );
 
   if (!query.data || query.isLoading) {
-    return <div>Loading...</div>;
+    return <Spinner />;
   }
 
   console.log(query.data);
 
   return (
-    <div>
-      <table>
-        <thead>
-          <tr>
-            <th>Number of PRs</th>
-            <th>Total number of hours to merge</th>
-            <th>Average</th>
-            <th>P50</th>
-            <th>P75</th>
-            <th>P90</th>
-            <th>P99</th>
-          </tr>
-        </thead>
+    <Box>
+      <Table>
+        <Thead>
+          <Tr>
+            <Th>Number of PRs</Th>
+            <Th>Total number of hours to merge</Th>
+            <Th>Average</Th>
+            <Th>P50</Th>
+            <Th>P75</Th>
+            <Th>P90</Th>
+            <Th>P99</Th>
+          </Tr>
+        </Thead>
 
-        <tbody>
-          <tr>
-            <td>{query.data.prs.length}</td>
-            <td>
+        <Tbody>
+          <Tr>
+            <Td>{query.data.prs.length}</Td>
+            <Td>
               {query.data.prs
                 .map((pr) => pr.hoursUntilMerge)
                 .reduce((a, b) => a + b, 0)}
-            </td>
-            <td>{query.data.stats.average}</td>
-            <td>{query.data.stats.p50}</td>
-            <td>{query.data.stats.p75}</td>
-            <td>{query.data.stats.p90}</td>
-            <td>{query.data.stats.p99}</td>
-          </tr>
-        </tbody>
-      </table>
+            </Td>
+            <Td>{query.data.stats.average}</Td>
+            <Td>{query.data.stats.p50}</Td>
+            <Td>{query.data.stats.p75}</Td>
+            <Td>{query.data.stats.p90}</Td>
+            <Td>{query.data.stats.p99}</Td>
+          </Tr>
+        </Tbody>
+      </Table>
 
       <BarChart data={query.data.prs} width={730} height={250}>
         <Bar dataKey="hoursUntilMerge" fill="#8884d8">
           <LabelList dataKey="title" position="insideTop" angle={45} />
         </Bar>
       </BarChart>
-    </div>
+    </Box>
   );
 }
