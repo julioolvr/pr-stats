@@ -6,6 +6,7 @@ import PrivateRoute from "auth/PrivateRoute";
 import { AuthHandler } from "auth/AuthHandler";
 import Login from "pages/Login";
 import PrStats from "pages/PrStats";
+import Header from "ui/Header";
 
 function App() {
   return (
@@ -13,7 +14,14 @@ function App() {
       <Switch>
         <Route path="/login" component={Login} />
         <Route path="/auth/callback" component={AuthHandler} />
-        <PrivateRoute path="/:owner/:repository" component={PrStats} />
+
+        <PrivateRoute>
+          <Header />
+
+          <Switch>
+            <PrivateRoute path="/:owner/:repository" component={PrStats} />
+          </Switch>
+        </PrivateRoute>
       </Switch>
     </Config>
   );
