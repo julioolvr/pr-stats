@@ -1,6 +1,8 @@
+import { useMemo } from "react";
 import { Box } from "@chakra-ui/react";
 import AsyncSelect from "react-select/async";
 import { useHistory } from "react-router-dom";
+import debounce from "debounce";
 
 import useGithubToken from "auth/useGithubToken";
 import searchRepositories from "modules/searchRepositories";
@@ -14,18 +16,22 @@ export default function Header() {
   const token = useGithubToken()!;
   const history = useHistory();
 
-  async function loadOptions(inputValue: string) {
-    const results = await searchRepositories({
-      term: inputValue,
-      token,
-      count: COUNT,
-    });
+  const loadOptions = useMemo(
+    () =>
+      debounce(async (inputValue: string) => {
+        const results = await searchRepositories({
+          term: inputValue,
+          token,
+          count: COUNT,
+        });
 
-    return results.matches.map((result) => ({
-      label: result.nameWithOwner,
-      value: result,
-    }));
-  }
+        return results.matches.map((result) => ({
+          label: result.nameWithOwner,
+          value: result,
+        }));
+      }, 200),
+    [token]
+  );
 
   return (
     <Box as="header">

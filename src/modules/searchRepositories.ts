@@ -7,8 +7,6 @@ export default async function searchRepositories({
 }: SearchRepositoriesOptions): Promise<Result> {
   const githubClient = new Octokit();
 
-  console.log("searching repositories...", term, count, token);
-
   const response = await githubClient.graphql<{
     search: {
       edges: [{ node: RepositoryResponse }];
@@ -41,8 +39,6 @@ export default async function searchRepositories({
       },
     }
   );
-
-  console.log({ response });
 
   return {
     matches: response.search.edges.map((edge) =>
