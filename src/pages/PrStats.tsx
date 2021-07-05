@@ -1,6 +1,6 @@
 import { RouteComponentProps } from "react-router-dom";
 import { useQuery } from "react-query";
-import { BarChart, Bar, LabelList } from "recharts";
+import { BarChart, Bar, LabelList, ResponsiveContainer } from "recharts";
 import {
   Spinner,
   Heading,
@@ -74,11 +74,13 @@ export default function PrListTest({
           <StatBox title="p99" number={query.data.stats.p99} />
         </SimpleGrid>
 
-        <BarChart data={query.data.prs} width={730} height={250}>
-          <Bar dataKey="hoursUntilMerge" fill="#8884d8">
-            <LabelList dataKey="title" position="insideTop" angle={45} />
-          </Bar>
-        </BarChart>
+        <ResponsiveContainer width="100%" height={250}>
+          <BarChart data={query.data.prs}>
+            <Bar dataKey="hoursUntilMerge" fill="#8884d8">
+              <LabelList dataKey="title" position="insideTop" angle={45} />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
       </Stack>
     </Container>
   );
